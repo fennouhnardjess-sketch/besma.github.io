@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>For Besouma ❤️</title>
+<style>
+body{
+  margin:0; overflow:hidden; font-family:Arial; text-align:center;
+  background:linear-gradient(#ffd6ec,#ffc2e2);
+}
+
+/* floating hearts background */
+.heart{
+  position:absolute; color:rgba(255,0,120,0.15);
+  font-size:40px; animation:float 10s linear infinite;
+}
+@keyframes float{
+  0%{transform:translateY(100vh);}
+  100%{transform:translateY(-10vh);}
+}
+
+/* PAGE 1 */
+#page1{height:100vh; position:relative;}
+h2{color:#ff2f92;}
+#instruction{font-size:22px; color:#c2185b;}
+
+/* bowl */
+#bowl{
+  position:absolute; bottom:40px; left:50%; transform:translateX(-50%);
+  width:320px; height:180px; background:white;
+  border-radius:0 0 160px 160px; border:8px solid #d9d9d9;
+  box-shadow:inset 0 -20px 30px rgba(0,0,0,0.15); overflow:hidden;
+}
+#milk{position:absolute; bottom:0; width:100%; height:90px; background:white;}
+
+/* splash */
+.splash{position:absolute; font-size:22px; animation:splash 0.8s forwards;}
+@keyframes splash{
+  0%{transform:scale(0);}
+  100%{transform:scale(1.6);opacity:0;}
+}
+
+/* cookies */
+.cookie{position:absolute; font-size:50px; cursor:grab; transition:transform .2s;}
+.cookie:hover{transform:scale(1.2);}
+
+/* PAGE 2 */
+#page2{display:none; height:100vh; position:relative;}
+#cozyText{
+  position:absolute; top:15%; left:50%; transform:translateX(-50%);
+  font-family:'Dancing Script', cursive; font-size:55px; color:#ff2f92;
+  text-shadow:2px 2px 8px #ffb6c1; opacity:0; animation:fadeInText 2s forwards;
+}
+@keyframes fadeInText{ to{opacity:1;} }
+
+/* 3D heart container */
+#heart3d{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:400px; height:400px;
+}
+
+/* mouse trail hearts */
+.trailHeart{
+  position:absolute; font-size:15px; color:pink; pointer-events:none;
+  animation:heartFloat 1s forwards;
+}
+@keyframes heartFloat{
+  0%{opacity:1; transform:translateY(0);}
+  100%{opacity:0; transform:translateY(-30px) scale(1.2);}
+}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div id="page1">
+  <h2>For Besouma ❤️</h2>
+  <div id="instruction">Drag the cookies into the milk bowl 🍪🥛</div>
+  <div id="bowl"><div id="milk"></div></div>
+</div>
+
+<div id="page2">
+  <div id="cozyText">I ❤️ You Besouma</div>
+  <div id="heart3d"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
+<script>
+/* floating hearts background */
+for(let i=0;i<30;i++){
+  let h=document.createElement("div"); h.className="heart"; h.innerHTML="❤";
+  h.style.left=Math.random()*100+"%";
+  h.style.fontSize=(20+Math.random()*30)+"px";
+  h.style.animationDuration=(6+Math.random()*6)+"s";
+  document.body.appendChild(h);
+}
+
+/* cookies drag-drop inside bowl */
+const bowl=document.getElementById("bowl"), page1=document.getElementById("page1"), page2=document.getElementById("page2");
+let total=8, count=0;
+function createCookie(){
+  let c=document.createElement("div"); c.className="cookie"; c.innerHTML="🍪";
+  c.style.top=Math.random()*70+"%"; c.style.left=Math.random()*90+"%";
+  c.draggable=true;
+  c.addEventListener("dragstart",e=>{ e.dataTransfer.setData("text/plain",null); c.dataset.dragging="true"; });
+  c.addEventListener("dragend",()=>{ delete c.dataset.dragging; });
+  document.body.appendChild(c);
+}
+for(let i=0;i<total;i++) createCookie();
+bowl.addEventListener("dragover",e=>e.preventDefault());
+bowl.addEventListener("drop",()=>{
+  let dragging=document.querySelector('[data-dragging="true"]');
+  if(dragging){
+    // Random position inside bowl
+    const bowlRect = bowl.getBoundingClientRect();
+    const cookieSize = 50;
+    const randX = Math.random() * (bowlRect.width - cookieSize);
+    const randY = Math.random() * (bowlRect.height - cookieSize);
+    dragging.style.position="absolute";
+    dragging.style.left = randX + "px";
+    dragging.style.top = randY + "px";
+    bowl.appendChild(dragging);
+
+    milkSplash(); 
+    count++;
+    if(count===total){
+      setTimeout(()=>{
+        page1.style.display="none"; 
+        page2.style.display="block";
+        startFireworks(); 
+        initHeart3D();
+      },800);
+    }
+  }
+});
+
+/* milk splash */
+function milkSplash(){
+  let s=document.createElement("div"); s.className="splash"; s.innerHTML="💦";
+  s.style.left=Math.random()*260+"px"; s.style.bottom="90px";
+  bowl.appendChild(s); setTimeout(()=>s.remove(),800);
+}
+
+/* mouse trail hearts */
+document.addEventListener('mousemove', e=>{
+  const heart = document.createElement('div');
+  heart.className = 'trailHeart';
+  heart.style.left = e.pageX + 'px';
+  heart.style.top = e.pageY + 'px';
+  document.body.appendChild(heart);
+  setTimeout(()=>heart.remove(),1000);
+});
+
+/* fireworks */
+function startFireworks(){
+  setInterval(()=>{
+    for(let i=0;i<25;i++){
+      let f=document.createElement("div"); f.style.position="absolute";
+      f.style.width="6px"; f.style.height="6px"; f.style.borderRadius="50%";
+      f.style.background = `hsl(${Math.random()*360},100%,50%)`;
+      let x=(Math.random()*300-150)+"px", y=(Math.random()*300-150)+"px";
+      f.style.left=Math.random()*100+"%"; f.style.top=Math.random()*100+"%";
+      document.body.appendChild(f);
+      f.animate([{transform:'translate(0,0)',opacity:1},{transform:`translate(${x},${y})`,opacity:0}], {duration:1000,easing:'ease-out'});
+      setTimeout(()=>f.remove(),1000);
+    }
+  },600);
+}
+
+/* 3D Sparkly Heart */
+function initHeart3D(){
+  const container=document.getElementById('heart3d');
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(45,1,true,0.1,1000);
+  camera.position.set(0,0,6);
+  const renderer=new THREE.WebGLRenderer({alpha:true,antialias:true});
+  renderer.setSize(container.clientWidth,container.clientHeight);
+  container.appendChild(renderer.domElement);
+
+  const light = new THREE.PointLight(0xffffff,1);
+  light.position.set(5,5,5); scene.add(light);
+
+  // Heart shape
+  const x = t => 16*Math.pow(Math.sin(t),3);
+  const y = t => 13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t);
+  const heartShape = new THREE.Shape();
+  heartShape.moveTo(0,0);
+  for(let i=0;i<=Math.PI*2;i+=0.01){
+    heartShape.lineTo(x(i)/10, y(i)/10);
+  }
+  const geometry = new THREE.ExtrudeGeometry(heartShape,{depth:1, bevelEnabled:true, bevelThickness:0.2, bevelSize:0.2, bevelSegments:3});
+  const material = new THREE.MeshPhongMaterial({color:0xff2f92, shininess:100});
+  const heartMesh = new THREE.Mesh(geometry, material);
+  scene.add(heartMesh);
+
+  // sparkles
+  const sparkGeom = new THREE.SphereGeometry(0.05,6,6);
+  const sparkMat = new THREE.MeshBasicMaterial({color:0xffffff});
+  const sparks = [];
+  for(let i=0;i<50;i++){
+    const spark = new THREE.Mesh(sparkGeom,sparkMat);
+    spark.position.set(Math.random()*2-1,Math.random()*2-1,Math.random()*2-1);
+    scene.add(spark);
+    sparks.push(spark);
+  }
+
+  function animate(){
+    requestAnimationFrame(animate);
+    heartMesh.rotation.y += 0.01;
+    heartMesh.rotation.x = 0.05*Math.sin(Date.now()/500);
+    sparks.forEach(s=>{
+      s.position.x += (Math.random()-0.5)*0.02;
+      s.position.y += (Math.random()-0.5)*0.02;
+      s.position.z += (Math.random()-0.5)*0.02;
+    });
+    renderer.render(scene,camera);
+  }
+  animate();
+}
+</script>
+</body>
+</html>
